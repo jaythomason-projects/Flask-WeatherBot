@@ -45,7 +45,7 @@ class TestWeatherAdapter(unittest.TestCase):
     def test_process_out_of_forecast_range(self):
         statement = Statement("What is the weather going to be like in London in three weeks?")
         response = self.adapter.process(statement)
-        self.assertIn("I couldn't find the weather for 'London' on ", response.text)
+        self.assertEqual("You specified a date that's more than 7 days from today! I can only get weather data for the next week.", response.text)
 
     def test_process_successful_response(self):
         statement = Statement("What's the weather in London on Tuesday?")

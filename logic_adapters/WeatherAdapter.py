@@ -117,6 +117,13 @@ class WeatherAdapter(LogicAdapter):
                     'message': "You specified more than one date! I can only give you the weather for one date at a time.",
                     'confidence': 0.70
                 }
+            # If the date is greater than 7 days from today, return a warning
+            elif dates[0] > get_date_from_string('7 days'):
+                return {
+                    'status': "WARNING",
+                    'message': "You specified a date that's more than 7 days from today! I can only get weather data for the next week.",
+                    'confidence': 0.70
+                }
             else:
                 return func(self, locations, dates)
         return wrapper
