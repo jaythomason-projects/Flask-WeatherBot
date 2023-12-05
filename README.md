@@ -1,4 +1,4 @@
-## Weatherbot - A Flask Weather Chatbot
+## Weatherbot - A Weather Chatbot built with Flask and Chatterbot
 
 This is Weatherbot, a Flask-based weather chatbot that gives accurate, real-time weather info for any location, with a special focus on the UK. Weatherbot also has some handy tips for anyone exploring the UK.
 
