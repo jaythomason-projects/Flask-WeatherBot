@@ -35,7 +35,7 @@ class Forecast(Model):
             'description': self.description,
             'temperature': f"{round(self.temperature)}°C",
             'humidity': f"{self.humidity}%",
-            'wind_speed': f"{self.wind_speed}km/s",
+            'wind_speed': f"{round(self.wind_speed)}km/s",
             'wind_direction': self.get_readable_wind_direction()
         }
         return readable_weather_data
