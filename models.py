@@ -6,7 +6,7 @@ db = SqliteDatabase('weather.db')
 class Location(Model):
     id = PrimaryKeyField()
     name = CharField(max_length=50)
-    province = CharField(max_length=50)
+    province = CharField(max_length=50, null=True)
     country = CharField(max_length=50)
     latitude = FloatField()
     longitude = FloatField()

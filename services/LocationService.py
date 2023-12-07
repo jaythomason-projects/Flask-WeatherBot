@@ -1,4 +1,5 @@
 from peewee import DoesNotExist
+from fuzzywuzzy import process
 from models import Location
 import config
 from utils import *
@@ -16,24 +17,66 @@ class LocationService:
             return None
 
     @staticmethod
+    def get_best_location_match(location_name, response):
+        if len(response['results']) == 1:
+            return response['results'][0]
+        else:
+            response_names = [result['formatted_address'] for result in response['results']]
+            best_match = process.extractOne(location_name, response_names)
+            for result in response['results']: #? Is there a better way to do this?
+                if result['formatted_address'] == best_match[0]:
+                    return result
+
+    @staticmethod
+    def is_valid_location(response):
+        address_components = response['address_components']
+
+        # If there's less than two address components, it's likely a country.
+        if len(address_components) < 2:
+            return False
+        
+        # If the first address component is a country or province, it's likely the user asked about a country or state.
+        elif 'country' in address_components[0]['types'] or 'administrative_area_level_1' in address_components[0]['types']:
+            return False
+        
+        else:
+            return True
+        
+    @staticmethod
+    def extract_location_data(location_data):
+        province = None
+        country = None
+
+        for component in location_data['address_components']:
+            if 'administrative_area_level_1' in component['types']:
+                province = component['long_name']
+            elif 'country' in component['types']:
+                country = component['long_name']
+
+        return {
+            'name': location_data['address_components'][0]['long_name'],
+            'province': province,
+            'country': country,
+            'latitude': location_data['geometry']['location']['lat'],
+            'longitude': location_data['geometry']['location']['lng']
+        }
+
+    @staticmethod
     def get_location_from_api(location_name):
         url = LocationService.GOOGLE_MAPS_API_URL.format(location_name, LocationService.GOOGLE_KEY)
         response = make_request(url)
         
-        if response['status'] == 'OK':
-            # Check address_components for locality, which indicates a city or suburb
-            for component in response['results'][0]['address_components']:
-                if 'locality' in component['types']:
-                    return {
-                        'name': component['long_name'],
-                        'province': response['results'][0]['address_components'][1]['long_name'],
-                        'country': response['results'][0]['address_components'][2]['long_name'],
-                        'latitude': response['results'][0]['geometry']['location']['lat'],
-                        'longitude': response['results'][0]['geometry']['location']['lng']
-                    }
-        else:
+        if response['status'] != 'OK':
             console_log(f"Error fetching location data for '{location_name}'. API response: {response['status']}", "ERROR")
             return None
+        else:
+            location = LocationService.get_best_location_match(location_name, response)
+
+            if location and LocationService.is_valid_location(location):
+                return LocationService.extract_location_data(location)
+            else:
+                console_log(f"'{location_name}' is not a valid location (eg. a country).", "ERROR")
+                return None
 
     @staticmethod
     def add_location_to_db(location_data):
@@ -75,7 +118,7 @@ class LocationService:
                     console_log(f"Could not fetch location data for '{location_name}'. Skipping...", "WARNING")
                     continue
                 else:
-                    console_log(f"Added location '{location_name}' to database.", "INFO")
                     LocationService.add_location_to_db(location_data)
+                    console_log(f"Added location '{location_name}' to database.", "INFO")
             else:
                 console_log(f"Location '{location_name}' already in database. Skipping...", "INFO")
