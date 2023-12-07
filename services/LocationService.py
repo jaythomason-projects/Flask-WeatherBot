@@ -107,18 +107,3 @@ class LocationService:
             return LocationService.add_location_to_db(location_from_api)
         else:
             return None
-        
-    @staticmethod
-    def ensure_default_locations_in_db():
-        for location_name in config.DEFAULT_LOCATIONS:
-            location = LocationService.get_location_from_db(location_name)
-            if not location:
-                location_data = LocationService.get_location_from_api(location_name)
-                if not location_data:
-                    console_log(f"Could not fetch location data for '{location_name}'. Skipping...", "WARNING")
-                    continue
-                else:
-                    LocationService.add_location_to_db(location_data)
-                    console_log(f"Added location '{location_name}' to database.", "INFO")
-            else:
-                console_log(f"Location '{location_name}' already in database. Skipping...", "INFO")
