@@ -4,6 +4,7 @@ from spacy import load
 from services.LocationService import LocationService
 from services.WeatherService import WeatherService
 from utils import *
+import config
 
 # Logic adapter for processing weather-related queries
 class WeatherAdapter(LogicAdapter):
@@ -32,7 +33,7 @@ class WeatherAdapter(LogicAdapter):
 
         # Extract locations and dates from the statement
         tokenised_statement = self.nlp(statement.text)
-        locations = [ent.text for ent in tokenised_statement.ents if ent.label_ == 'GPE'] #TODO: Add support for 'LOC' label, or create a list of additional locations
+        locations = [ent.text for ent in tokenised_statement.ents if ent.label_ == 'GPE' or ent.text in config.DEFAULT_LOCATIONS]
         dates = [ent.text for ent in tokenised_statement.ents if ent.label_ == 'DATE']
         console_log(f"Found locations and dates: {locations}, {dates}", "DEBUG")
 
