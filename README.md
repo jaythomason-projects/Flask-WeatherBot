@@ -6,7 +6,7 @@ This app is built using Flask for the front-end and Python and Chatterbot for th
 
 ## Instructions
 ### Installation
-1. You'll need to install Python 3.7 or higher. You can download the different versions of Python [here](https://www.python.org/downloads/).
+1. You'll need to install Python 3.7. You can download the different versions of Python [here](https://www.python.org/downloads/).
 2. Navigate to the project's root directory.
 3. Create a virtual environment by running `python3 -m venv venv`
 3. Activate the virtual environment by running `source ./venv/bin/activate`
