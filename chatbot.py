@@ -31,9 +31,8 @@ chatbot = ChatBot(
         {
             'import_path': WEATHER_LOGIC
         },
-        BEST_MATCH,
         {
-            'import_path': BEST_MATCH,
+            'import_path': 'chatterbot.logic.BestMatch',
             'default_response': "I am sorry, I don't understand. I am still learning.",
             'maximum_similarity_threshold': 0.90
         }
