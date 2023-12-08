@@ -1,5 +1,5 @@
 import requests
-import datetime
+from datetime import datetime, timedelta
 import dateparser
 
 # Found that the dateparser library was not able to parse dates that contained certain words, so created this decorator to remove them
@@ -25,7 +25,7 @@ def make_request(url):
     return response
 
 def console_log(message, log_type):
-    current_time = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    current_time = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
     log_types = {
         'INFO': f"[INFO][{current_time}]: {message}",
         'DEBUG': f"[DEBUG][{current_time}]: {message}",

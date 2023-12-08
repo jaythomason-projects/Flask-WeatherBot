@@ -18,27 +18,37 @@ class LocationService:
 
     @staticmethod
     def get_best_location_match(location_name, response):
-        if len(response['results']) == 1:
-            return response['results'][0]
+        results = response['results']
+        
+        if len(results) == 1:
+            return results[0]
         else:
-            response_names = [result['formatted_address'] for result in response['results']]
+            # Create a list of all the result's addresses
+            response_names = [result['formatted_address'] for result in results]
+
+            # Use Levenshtein distance to find the best match
             best_match = process.extractOne(location_name, response_names)
-            for result in response['results']: #? Is there a better way to do this?
-                if result['formatted_address'] == best_match[0]:
-                    return result
+
+            # Return the API response result that contains the best match
+            return next((result for result in results if result['formatted_address'] == best_match[0]), None)
 
     @staticmethod
     def is_valid_location(response):
+        '''
+        The Geocoding API response organises address components in a certain order, 
+        typically with the locality at the top and the country at the bottom (but, this order can vary). 
+        This function determines if the specified location is not an unwanted type (eg. a country)
+        '''
         address_components = response['address_components']
+        address_component_types = [component['types'] for component in address_components]
+        unwanted_types = ['administrative_area_level_1', 'country']
 
-        # If there's less than two address components, it's likely a country.
+        # If there's less than two address components, it's probably an unwanted type
         if len(address_components) < 2:
             return False
-        
-        # If the first address component is a country or province, it's likely the user asked about a country or state.
-        elif 'country' in address_components[0]['types'] or 'administrative_area_level_1' in address_components[0]['types']:
+        # Checks if the address type is not an unwanted type
+        elif any(type in address_component_types for type in unwanted_types):
             return False
-        
         else:
             return True
         
@@ -46,7 +56,7 @@ class LocationService:
     def extract_location_data(location_data):
         province = None
         country = None
-
+        
         for component in location_data['address_components']:
             if 'administrative_area_level_1' in component['types']:
                 province = component['long_name']

@@ -6,7 +6,7 @@ from utils import *
 class WeatherService:
     OPENWEATHER_KEY = config.OPENWEATHER_API_KEY
     WEATHER_DATA_EXPIRATION_DAYS = config.WEATHER_DATA_EXPIRATION_DAYS
-    WEATHER_DATA_EXPIRY = datetime.datetime.now() - datetime.timedelta(days=WEATHER_DATA_EXPIRATION_DAYS)
+    WEATHER_DATA_EXPIRY = datetime.now() - timedelta(days=WEATHER_DATA_EXPIRATION_DAYS)
     OPEN_WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5/onecall?lat={}&lon={}&exclude=current,minutely,hourly,alerts&units=metric&appid={}'
 
     @staticmethod
@@ -33,22 +33,21 @@ class WeatherService:
         url = WeatherService.OPEN_WEATHER_API_URL.format(lat, lng, WeatherService.OPENWEATHER_KEY)
         response = make_request(url)
 
-        if 'daily' in response:
-            forecasts = []
-            for day in response['daily']:
-                forecasts.append({
-                    'date': datetime.datetime.fromtimestamp(day['dt']).strftime('%d-%m-%Y'),
-                    'icon': day['weather'][0]['icon'],
-                    'description': day['weather'][0]['description'],
-                    'temperature': day['temp']['day'],
-                    'humidity': day['humidity'],
-                    'wind_speed': day['wind_speed'],
-                    'wind_direction': day['wind_deg']
-                })
-            return forecasts
-        else:
+        if 'daily' not in response:
             console_log(f"Error fetching forecast data for '{lat}, {lng}'. API response: {response['message']}", "ERROR")
             return None
+        else:
+            forecasts = [{
+                'date': datetime.fromtimestamp(day['dt']).strftime('%d-%m-%Y'),
+                'icon': day['weather'][0]['icon'],
+                'description': day['weather'][0]['description'],
+                'temperature': day['temp']['day'],
+                'humidity': day['humidity'],
+                'wind_speed': day['wind_speed'],
+                'wind_direction': day['wind_deg']
+            } for day in response['daily']]
+
+            return forecasts
     
     @staticmethod
     def add_forecast_to_db(location, weather_data):
