@@ -111,9 +111,18 @@ class LocationService:
         console_log(f"Location '{location_name}' not found in database. Fetching from API...", "INFO")
         location_from_api = LocationService.get_location_from_api(location_name)
 
-        # If API call is successful, add the location data to the database and return it
-        if location_from_api:
-            console_log(f"Location '{location_name}' found in API. Adding to database and returning...", "INFO")
-            return LocationService.add_location_to_db(location_from_api)
-        else:
+        # If API call is unsuccessful, return None
+        if not location_from_api:
             return None
+        
+        # If the API returns a different location name (eg. Stonehenge returns the town of Salisbury), check the database again to make sure it's not already there
+        if location_from_api['name'] != location_name:
+            console_log(f"API returned '{location_from_api['name']}' instead of '{location_name}'. Checking database for '{location_from_api['name']}'...", "INFO")
+            location_from_db = LocationService.get_location_from_db(location_from_api['name'])
+            if location_from_db:
+                console_log(f"Location '{location_from_api['name']}' found in database.", "INFO")
+                return location_from_db
+        
+        # If API call is successful, add the location data to the database and return it
+        console_log(f"Location '{location_name}' found in API. Adding to database and returning...", "INFO")
+        return LocationService.add_location_to_db(location_from_api)
