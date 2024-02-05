@@ -45,14 +45,9 @@ jobs:
         # Confirm the change
         echo "PYTHONPATH=${PYTHONPATH}"
 
-    - name: Set environment variables
-      run: echo "Setting up environment variables"
-      env:
-        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
-        OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
-        WEATHER_DATA_EXPIRATION_DAYS: 1
-
-    - name: Test with pytest
+    - name: Set environment variables and test with pytest
       run: |
+        export GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+        export OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}
+        export WEATHER_DATA_EXPIRATION_DAYS=1
         pytest
-
